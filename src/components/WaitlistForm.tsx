@@ -16,7 +16,7 @@ const WaitlistForm = () => {
     message: '',
   });
 
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mqargqvj'; 
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xovgplqp'; 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
