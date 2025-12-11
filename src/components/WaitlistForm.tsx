@@ -16,9 +16,11 @@ const WaitlistForm = () => {
     message: '',
   });
 
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mqargqvj'; 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.email.trim()) {
       toast({
         title: 'Error',
@@ -28,7 +30,6 @@ const WaitlistForm = () => {
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast({
@@ -41,23 +42,39 @@ const WaitlistForm = () => {
 
     setIsLoading(true);
 
-    // Simulate API call and store in localStorage
-    setTimeout(() => {
-      const existingEntries = JSON.parse(localStorage.getItem('suntrack-waitlist') || '[]');
-      const newEntry = {
-        ...formData,
-        timestamp: new Date().toISOString(),
-        id: Date.now(),
-      };
-      localStorage.setItem('suntrack-waitlist', JSON.stringify([...existingEntries, newEntry]));
-      
-      setIsLoading(false);
-      setIsSubmitted(true);
-      toast({
-        title: 'Success!',
-        description: t.waitlist.success,
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
       });
-    }, 1000);
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        toast({
+          title: 'Success!',
+          description: t.waitlist.success,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Network error. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isSubmitted) {
@@ -87,7 +104,7 @@ const WaitlistForm = () => {
           required
         />
       </div>
-      
+
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
           {t.waitlist.email} *
@@ -102,7 +119,7 @@ const WaitlistForm = () => {
           required
         />
       </div>
-      
+
       <div>
         <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
           {t.waitlist.message}
@@ -115,7 +132,7 @@ const WaitlistForm = () => {
           className="w-full min-h-[100px]"
         />
       </div>
-      
+
       <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
         {isLoading ? '...' : t.waitlist.submit}
       </Button>
